@@ -1,0 +1,93 @@
+%filltext{
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 700;
+    letter-spacing: normal;
+}
+
+button{
+  
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+.btn1{
+    @extend %filltext;
+    background-color: #e6e6e6;
+    color: #000;
+    height: 40px;
+    &-current{
+      min-width:300px;
+      height:40px;
+    }
+
+    &.btn1-mt5 {
+        margin-top: 7px;
+    }
+    &.btn1-mt30{
+        margin-top: 30px;
+    }
+    &.btn1-mt100{
+        font-size: 17px;
+        font-weight: 600;
+        margin-top: 50px;
+        height: 55px;
+    }
+
+    &.btn1-mt222{
+        margin-top: 195px;
+        margin-bottom: 26px;
+    }
+    
+    &.btn1-mt300{
+        margin-top: 309px;
+    }
+
+    &.btn1-mt26{
+        margin-top: 26px;
+    }
+}
+
+.btn2{
+    height: 40px;
+    background: #00aaff;
+    @extend %filltext;
+    text-align: start;
+    color: #fff;
+
+    &.btn2-mt8{
+        margin-top: 8px;
+    }
+}
+
+.btn3{
+    @extend %filltext;
+        height: 40px;
+        padding: 16px;
+        color: #00aaff;
+        background: inherit;
+        border: 1px solid #7190a5;
+
+        &.btn3-mt21{
+            margin-top: 21px;
+        }
+        &.btn3-mt26{
+            color: #fff;
+            margin: 26px 0 54px;
+
+        }
+
+        &.btn3-mt19px{
+            height: 50px !important;
+            margin-bottom: 19px;
+        }
+
+        &:hover{
+            background: #2d526b;
+        }
+}

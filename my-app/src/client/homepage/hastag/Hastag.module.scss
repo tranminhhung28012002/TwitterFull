@@ -1,0 +1,17 @@
+.hastag {
+  margin-top: 10px;
+  margin-left: 11px;
+  margin-bottom: 10px;
+  width: 20%;
+  background: inherit;
+  border: none;
+  outline: none;
+  color: #1da1f2;
+  padding: 10px;
+  font-size: 15px;
+  line-height: 20px;
+  border-radius: 20px;
+  &:focus {
+    outline: 1px solid #1da1f2;
+  }
+}

@@ -1,0 +1,19 @@
+$primary-color: #1da1f2;
+$background-color: #000;
+$text-color: #fff;
+$sidebar-bg: #1a1a1a;
+
+.Footer {
+    padding: 20px;
+    button {
+        background-color: $primary-color;
+        color: $text-color;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        &:hover {
+            background-color: darken($primary-color, 10%);
+        }
+    }
+}

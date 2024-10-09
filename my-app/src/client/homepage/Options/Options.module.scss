@@ -1,0 +1,56 @@
+.Options {
+  &__object {
+    display: flex;
+    gap: 10px;
+  }
+  &__every {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 9999px;
+    padding: 0 12px;
+    width: 182px;
+    min-width: 24px;
+    min-height: 24px;
+    color: #1da1f2;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    text-align: start;
+    &:hover {
+      background: #0398f533;
+      transition:
+        background-color 0.2s,
+        box-shadow 0.2s;
+    }
+    &__icon {
+      width: 10px;
+      height: 10px;
+    }
+    &__reply {
+      margin-bottom: 5px;
+    }
+  }
+  &__options {
+    cursor: pointer;
+    position: absolute;
+    top: 75%;
+    left: 11%;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 1px rgba(105, 105, 105, 0.75);
+    background-color: #000;
+    color: #fff;
+    z-index: 999;
+    p {
+      padding: 7px 12px;
+      color: #1da1f2;
+      font-size: 15px;
+      line-height: 20px;
+      font-weight: 700;
+      &:hover {
+        background: #252525;
+      }
+    }
+  }
+}

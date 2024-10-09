@@ -1,0 +1,29 @@
+.exploreContent {
+  &__item {
+    border-bottom: 1px solid #e1e8ed;
+    padding: 15px 0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  &__itemTitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  &__itemDescription {
+    font-size: 14px;
+    color: #657786;
+  }
+  &__err {
+    font-size: 31px;
+    line-height: 36px;
+    font-weight: 800;
+    white-space: pre-wrap;
+    text-align: left;
+    margin-top: 31px;
+    width: auto;
+  }
+}

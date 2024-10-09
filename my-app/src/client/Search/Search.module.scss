@@ -1,0 +1,21 @@
+.container {
+  width: 1260px;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  color: #fff;
+}
+
+.explore {
+    position: relative;
+    width: 616px;
+    background-color: inherit;
+    border-left: 1px solid #222222;
+    border-right: 1px solid #222222;
+    &__title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  }

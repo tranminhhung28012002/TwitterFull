@@ -1,0 +1,31 @@
+.trendingTopics {
+    border-bottom: 1px solid #222222;
+    &__title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    &__list{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    &__item{
+        flex: 1;
+        padding: 15px 25px;
+        background-color: inherit;
+        font-size: 15px;
+        line-height: 20px;
+        color: #71767b;
+        &--aticle {
+            border-bottom: 2px solid #1da1f2;
+            color: #fff;
+            font-weight: 700;
+        }
+        &:hover{
+            background-color: #222222
+        }
+        cursor: pointer;
+    }
+}

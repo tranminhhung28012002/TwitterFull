@@ -1,0 +1,220 @@
+.container {
+    width: 1260px;
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .profile {
+    width: 613px;
+    
+    border-left: 1px solid #2f3336;
+    border-right: 1px solid #2f3336;
+  
+    &__header {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      border-bottom: 1px solid #2f3336;
+
+      &-name {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 24px;
+        color: #fff;
+      }
+  
+      h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+  
+      span {
+        font-size: 13px;
+        color: #6e767d;
+      }
+    }
+  
+    &__backIcon {
+      margin-right: 20px;
+      cursor: pointer;
+      color: #fff;
+      padding: 7px;
+      &:hover {
+        background-color: #2f3336;
+        border-radius: 50%;
+      }
+    }
+  
+    &__banner {
+      height: 200px;
+      overflow: hidden;
+        background-color:#494b4b;
+      img {
+        width: 100%;
+        object-fit: cover;
+      }
+    }
+  
+    &__info {
+      padding: 15px;
+      position: relative;
+    }
+  
+    &__avatar {
+      width: 134px;
+      height: 134px;
+      border-radius: 50%;
+      border: 4px solid #000;
+      position: absolute;
+      top: -75px;
+      left: 15px;
+    }
+  
+    &__name {
+      margin-top: 85px;
+      margin-bottom: 0;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 24px;
+      color: #fff;
+    }
+  
+    &__username {
+      color: #6e767d;
+      margin-top: 3px;
+      line-height: 20px;
+      font-size: 15px;
+    }
+  
+    &__bio {
+      margin-top: 15px;
+      color:#6e767d ;
+    }
+  
+    &__details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 15px;
+      color: #6e767d;
+      font-size: 15px;
+      line-height: 12px;
+        
+      a {
+        color: #1da1f2;
+        text-decoration: none;
+      }
+    }
+  
+    &__followCounts {
+      display: flex;
+      gap: 20px;
+      margin-top: 15px;
+      font-size: 14px;
+      line-height: 12px;
+      span {
+        color: #6e767d;
+        strong {
+          color: #fff;
+        }
+      }
+    }
+  
+    &__tabs {
+      display: flex;
+      border-bottom: 1px solid #2f3336;
+    }
+  
+    &__tab {
+      flex: 1;
+      background: none;
+      border: none;
+      color: #fff;
+      padding: 15px 0;
+      cursor: pointer;
+      font-weight: bold;
+  
+      &--active {
+        border-bottom: 2px solid #1da1f2;
+      }
+    }
+  
+    &__content {
+      padding: 15px;
+    }
+    &__nav{
+        position: absolute;
+        display: flex;
+        gap: 10px;
+        top: 13px;
+        right: 16px;
+    }
+
+    &__iconWrappter{
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        &:hover .profile__tooltip {
+            opacity: 1;
+            visibility: visible;
+          }
+    }
+    &__tooltip{
+        position: absolute;
+        top: 38px;
+        right: -3px;
+        padding: 3px;
+        background-color: #6e767d;
+        color: #fff;
+        font-size: 11px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    &__icon{
+        width: 20px;
+        height: 20px;
+        padding: 7px;
+        outline: 1px solid #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        filter: brightness(0) saturate(100%) invert(100%) sepia(100%) saturate(0%) 
+                hue-rotate(177deg) brightness(104%) contrast(102%);
+                
+    }
+    &__follow{
+        padding:0 30px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 15px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        &:hover{
+          background: #d3d3d3;
+        }
+    }
+  }
+
+  
+@media (max-width:1440px) {
+    .profile{
+        &__name{
+            margin-top: 65px;
+        }
+        &__bio{
+            margin-top: 18px;
+            font-size: 15px;
+            line-height: 20px; 
+            white-space: pre-wrap;           
+        }
+        &__tab{
+            margin-top: 45px;
+        }
+    }
+} 
+

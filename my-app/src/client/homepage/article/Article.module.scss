@@ -1,0 +1,145 @@
+$border-color: #222222;
+$background-color: #f9f9f9;
+$text-color: #666;
+$status-text-color: #333;
+$default-padding: 16px;
+$border-radius: 8px;
+
+%font {
+  font-size: 15px;
+  line-height: 20px;
+}
+
+p {
+  color: #fff;
+}
+
+.block {
+  outline: 1px solid $border-color;
+  padding: $default-padding;
+  margin: $default-padding 0;
+  background-color: inherit;
+  min-height: 100px;
+  display: flex;
+  gap: 8px;
+
+  &__Image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  &__post {
+    width: 100%;
+  }
+
+  &__Video {
+    width: 100%;
+    height: 519px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  &__Status {
+    margin-top: 6px;
+    margin-bottom: 13px;
+    font-weight: bold;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  &__article {
+    width: 100%;
+  }
+
+  &__Content {
+    display: flex;
+    font-size: 14px;
+    line-height: 20px;
+    color: $text-color;
+    margin-top: 14px;
+    align-items: center;
+
+    li {
+      position: relative;
+      cursor: pointer;
+      width: 113px;
+      align-items: center;
+      display: flex;
+      gap: 4px;
+      &:hover::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 7%;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+      }
+    }
+    &_reply {
+      &:hover::before {
+        background: rgba(0, 153, 255, 0.329);
+      }
+      &:hover {
+        filter: brightness(0) saturate(100%) invert(47%) sepia(99%) saturate(1345%) hue-rotate(178deg) brightness(95%)
+          contrast(98%);
+      }
+    }
+    &_undo {
+      &:hover::before {
+        background: rgba(0, 186, 124, 0.329);
+      }
+      &:hover {
+        filter: brightness(0) saturate(100%) invert(52%) sepia(35%) saturate(2402%) hue-rotate(123deg) brightness(91%)
+          contrast(102%);
+      }
+    }
+    &_like {
+      &:hover::before {
+        background: rgba(249, 24, 129, 0.329);
+      }
+      &:hover {
+        filter: brightness(0) saturate(100%) invert(45%) sepia(99%) saturate(7122%) hue-rotate(320deg) brightness(99%)
+          contrast(98%);
+      }
+    }
+    &_view {
+      &:hover::before {
+        background: rgba(0, 153, 255, 0.329);
+      }
+      &:hover {
+        filter: brightness(0) saturate(100%) invert(47%) sepia(99%) saturate(1345%) hue-rotate(178deg) brightness(95%)
+          contrast(98%);
+      }
+    }
+  }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+  }
+  &__info {
+    gap: 4px;
+    display: flex;
+  }
+
+  &__name {
+    @extend %font;
+    color: #fff;
+    font-weight: 700;
+  }
+  &__userEmail {
+    @extend %font;
+    color: #71767b;
+    font-weight: 500;
+  }
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
