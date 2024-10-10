@@ -352,6 +352,41 @@ class UsersService {
       new_refresh_token
     }
   }
+
+  // Service để lấy thông tin người dùng từ _id
+  async getProfile(_id: string) {
+    const user = await databaseService.users.findOne(
+      { _id: new ObjectId(_id) },
+      {
+        projection: {
+          password: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0
+        }
+      }
+    )
+    return user
+  }
+
+  // Service để lấy thông tin tất cả người dùng
+  async getAllUsers() {
+    return await databaseService.users
+      .find()
+      .project({
+        password: 0,
+        email_verify_token: 0,
+        forgot_password_token: 0,
+        created_at: 0,
+        updated_at: 0,
+        twitter_circle: 0,
+        bio: 0,
+        location: 0,
+        website: 0,
+        cover_photo: 0,
+        date_of_birth: 0
+      })
+      .toArray()
+  }
 }
 const usersService = new UsersService()
 export default usersService

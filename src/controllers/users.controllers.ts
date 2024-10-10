@@ -233,7 +233,7 @@ export const changePasswordController = async (
 }
 export const refreshTokenController = async (req: CustomRequest<refreshTokenBody>, res: Response) => {
   const { refresh_token } = req.body // Correct: refresh_token
-  const { user_id, verify } = req.decoded_refresh_token as TokenPayload;
+  const { user_id, verify } = req.decoded_refresh_token as TokenPayload
 
   const result = await usersService.refeshToken({ user_id, verify, refersh_token: refresh_token })
   return res.json({
@@ -242,3 +242,40 @@ export const refreshTokenController = async (req: CustomRequest<refreshTokenBody
   })
 }
 
+// Controller để lấy thông tin Profile
+export const getProfileController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { _id } = req.params
+
+    // Kiểm tra xem _id có phải ObjectId hợp lệ hay không
+    if (!ObjectId.isValid(_id)) {
+      return res.status(400).json({ message: 'Định dạng ID người dùng không hợp lệ.' })
+    }
+    const user = await usersService.getProfile(_id)
+    // Nếu user không tồn tại
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng.' })
+    }
+
+    // Trả về thông tin người dùng
+    return res.json({
+      message: USERS_MESSAGES.GET_ME_SUCCESS,
+      result: user
+    })
+  } catch (error) {
+    next(error) // Xử lý lỗi
+  }
+}
+
+// Controller để lấy thông tin tất cả Users
+export const getListUsersController = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  try {
+    const users = await usersService.getAllUsers()
+    return res.status(200).json({
+      message: 'Lấy danh sách người dùng thành công.',
+      result: users
+    })
+  } catch (error) {
+    next(error) // Xử lý lỗi
+  }
+}

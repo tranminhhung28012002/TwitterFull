@@ -1,7 +1,29 @@
-import { changePasswordValidator, followValidator, refreshTokenValidator, unfollowValidator } from './../middlewares/users.middlewares';
+import {
+  changePasswordValidator,
+  followValidator,
+  refreshTokenValidator,
+  unfollowValidator
+} from './../middlewares/users.middlewares'
 import { wrapRequestHandler } from './../../utils/handlerl'
 import { validate } from './../../utils/validation'
-import { changePasswordController, followController, forgotPasswordController, getMeController, getUsersForFollow, loginController, logoutController, refreshTokenController, registerController, resendverifyEmailController, resetPasswordController, unfollowController, updateMeController, verifyEmailController, verifyForgotPasswordController } from '../controllers/users.controllers'
+import {
+  changePasswordController,
+  followController,
+  forgotPasswordController,
+  getListUsersController,
+  getMeController,
+  getUsersForFollow,
+  loginController,
+  logoutController,
+  refreshTokenController,
+  registerController,
+  resendverifyEmailController,
+  resetPasswordController,
+  unfollowController,
+  updateMeController,
+  verifyEmailController,
+  verifyForgotPasswordController
+} from '../controllers/users.controllers'
 import { Router } from 'express'
 import {
   accessTokenValidatetor,
@@ -28,14 +50,20 @@ UserRouter.post('/logout', accessTokenValidatetor, wrapRequestHandler(logoutCont
 UserRouter.post('/verify-email', emailVerifyTokenValidator, wrapRequestHandler(verifyEmailController))
 UserRouter.post('/resend-verify-email', accessTokenValidatetor, wrapRequestHandler(resendverifyEmailController))
 UserRouter.post('/resend-forgot-password', forgotPasswordValidator, wrapRequestHandler(forgotPasswordController))
-UserRouter.post('/verify-forgot-password', verifyForgotPasswordTokenValidator,wrapRequestHandler(verifyForgotPasswordController))
+UserRouter.post(
+  '/verify-forgot-password',
+  verifyForgotPasswordTokenValidator,
+  wrapRequestHandler(verifyForgotPasswordController)
+)
 UserRouter.post('/reset-password', resetPasswordTokenValidator, wrapRequestHandler(resetPasswordController))
 UserRouter.get('/me', accessTokenValidatetor, wrapRequestHandler(getMeController))
-UserRouter.patch('/updateme', //này là cập nhật thông tin cá nhân
+UserRouter.patch(
+  '/updateme', //này là cập nhật thông tin cá nhân
   accessTokenValidatetor,
   verifiedUserValidator,
   updateMeValidator,
-  filterMiddleware<UpdateMeReqBody>([ //dùng để lọc ra những trường không được khai báo bên trong và chỉ lấy những trường khai báo
+  filterMiddleware<UpdateMeReqBody>([
+    //dùng để lọc ra những trường không được khai báo bên trong và chỉ lấy những trường khai báo
     'name',
     'date_of_birth',
     'bio',
@@ -48,8 +76,30 @@ UserRouter.patch('/updateme', //này là cập nhật thông tin cá nhân
   wrapRequestHandler(updateMeController)
 )
 UserRouter.get('/follow-list', accessTokenValidatetor, wrapRequestHandler(getUsersForFollow)) //lấy ds tất cả người dùng và đưa lên giao diện để hiện trên follow
-UserRouter.post('/follow',accessTokenValidatetor, verifiedUserValidator,followValidator,wrapRequestHandler(followController))
-UserRouter.delete('/follow/:user_id', accessTokenValidatetor,verifiedUserValidator,unfollowValidator, wrapRequestHandler(unfollowController))
-UserRouter.put('/change-password',accessTokenValidatetor,verifiedUserValidator,changePasswordValidator,wrapRequestHandler(changePasswordController))
-UserRouter.post('/refresh-token',refreshTokenValidator,wrapRequestHandler(refreshTokenController))
+UserRouter.post(
+  '/follow',
+  accessTokenValidatetor,
+  verifiedUserValidator,
+  followValidator,
+  wrapRequestHandler(followController)
+)
+UserRouter.delete(
+  '/follow/:user_id',
+  accessTokenValidatetor,
+  verifiedUserValidator,
+  unfollowValidator,
+  wrapRequestHandler(unfollowController)
+)
+UserRouter.put(
+  '/change-password',
+  accessTokenValidatetor,
+  verifiedUserValidator,
+  changePasswordValidator,
+  wrapRequestHandler(changePasswordController)
+)
+UserRouter.post('/refresh-token', refreshTokenValidator, wrapRequestHandler(refreshTokenController))
+
+// Đăng ký route cho việc lấy danh sách người dùng
+UserRouter.get('/listUsers', getListUsersController)
+
 export default UserRouter
