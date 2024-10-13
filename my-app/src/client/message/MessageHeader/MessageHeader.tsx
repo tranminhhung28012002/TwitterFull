@@ -8,44 +8,43 @@ import { IoMdClose } from 'react-icons/io'
 import axios from 'axios'
 import Cookies from 'js-cookie'
 
-//đổi hết lại kiểu dữ liệu
 interface ListMessage {
   _id: string
-  sender_id: string
-  content: string
-  receiver_id: string
+  email: string
+  name: string
+  userAvatar: string
 }
 
 export default function MessageHeader() {
   const [setting, setSetting] = useState<boolean>(false)
-  const handleSetting = () => {
-    setSetting(!setting)
-  }
-  const [AddMessage, setAddMessage] = useState(false)
-  const handleMessage = () => {
-    setAddMessage(!AddMessage)
-  }
+  const [AddMessage, setAddMessage] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
-  const [showListMessage, setShowListMessage] = useState<ListMessage[]>([])
+  const [users, setUsers] = useState<ListMessage[]>([]) // Cập nhật kiểu dữ liệu cho người dùng
+
   const token = Cookies.get('access_token')
+
   useEffect(() => {
-    const fetchMessages = async () => {
+    const fetchUsers = async () => {
       setLoading(true)
       try {
-        const response = await axios.get('http://localhost:3001/api/listUsers', {
+        const { data } = await axios.get('http://localhost:3000/api/listUsers', {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}` // Sử dụng token để xác thực
           }
         })
-        setShowListMessage(response.data) // Lưu dữ liệu vào trạng thái
+        setUsers(data.result) // Lưu dữ liệu người dùng vào state
       } catch (error) {
-        console.error('There was a problem with the fetch operation:', error)
+        console.log('Error fetching users:', error)
       } finally {
-        setLoading(false) // Kết thúc loading
+        setLoading(false) // Kết thúc trạng thái loading
       }
     }
-    fetchMessages()
-  }, [])
+    fetchUsers()
+  }, [token])
+
+  const handleSetting = () => setSetting(!setting)
+  const handleMessage = () => setAddMessage(!AddMessage)
+
   return (
     <>
       <div className={styles.MessageHeader}>
@@ -56,27 +55,32 @@ export default function MessageHeader() {
             <TbMessagePlus onClick={handleMessage} className={styles.MessageHeader__icon} />
           </div>
         </div>
-        {showListMessage.length === 0 ? (
+
+        {/* Hiển thị danh sách người dùng hoặc thông báo nếu chưa có */}
+        {!loading && users.length > 0 ? (
+          <div className={styles.MessageList}>
+            {users.map((user) => (
+              <div key={user._id} className={styles.MessageList__item}>
+                <img src={user.userAvatar} alt={`${user.name}'s avatar`} className={styles.MessageList__avatar} />
+                <div>
+                  <p className={styles.MessageList__name}>{user.name}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className={styles.MessageHeader__content}>
             <h1 className={styles.MessageHeader__heading}>Welcome to your inbox!</h1>
             <p className={styles.MessageHeader__comment}>
-              Drop a line, share posts and more with private conversations between you and others on X.{' '}
+              Drop a line, share posts and more with private conversations between you and others on X.
             </p>
             <button className={styles.MessageHeader__write} onClick={handleMessage}>
               Write a message
             </button>
           </div>
-        ) : (
-          <div className={styles.MessageList}>
-            {showListMessage.map((message) => (
-              <div key={message._id} className={styles.MessageList__item}>
-                <span className={styles.MessageList__name}>{message._id}</span>
-                <p className={styles.MessageList__chat}>{message.content}</p>
-              </div>
-            ))}
-          </div>
         )}
       </div>
+
       {AddMessage && (
         <div className={styles.show}>
           <div className={styles.MessageAdd}>
@@ -92,6 +96,22 @@ export default function MessageHeader() {
             <div className={styles.MessageAdd__Group}>
               <MdGroups2 className={styles.MessageAdd__icon__Group} />
               <p>Create a group</p>
+            </div>
+            <div className={styles.MessageAdd__list}>
+              {!loading && users.length > 0 ? (
+                <div className={styles.MessageList}>
+                  {users.map((user) => (
+                    <div key={user._id} className={styles.MessageList__item}>
+                      <img src={user.userAvatar} alt={`${user.name}'s avatar`} className={styles.MessageList__avatar} />
+                      <div>
+                        <p className={styles.MessageList__name}>{user.name}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.MessageHeader__content}></div>
+              )}
             </div>
           </div>
         </div>
