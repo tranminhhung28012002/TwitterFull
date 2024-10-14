@@ -6,13 +6,20 @@ import MessageHeader from './MessageHeader'
 import Cookies from 'js-cookie'
 import axios from 'axios'
 
+
 export default function Message() {
   const [showPostForm, setShowPostForm] = useState(false)
-  const handlePostClick = () => {
-    setShowPostForm(true)
-  }
   const [userInfo, setUserInfo] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [showMessages, setShowMessages] = useState(false)
+
+  const handlePostClick = () => setShowPostForm(true)
+  const [receiver, setReceiver] = useState<string>(''); // Trạng thái để lưu userId của người nhận
+
+  const handleUserClick = (userId: string) => {
+    setReceiver(userId); // Cập nhật receiver khi click vào user
+  };
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -32,11 +39,14 @@ export default function Message() {
     }
     fetchUserInfo()
   }, [])
+
+  if (loading) return <div>Loading...</div>
+
   return (
     <div className={styles.Container}>
       <Navbar onPostClick={handlePostClick} userInfo={userInfo} />
-      <MessageHeader />
-      <MessageBody />
+      <MessageHeader onClickMessage={handleUserClick} />
+      <MessageBody receiver={receiver}/>
     </div>
   )
 }
