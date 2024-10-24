@@ -41,10 +41,10 @@ export default function MessageHeader({ onClickMessage }: PropsClick) {
     }
     fetchUsers()
   }, [token])
-
   // Khi người dùng được chọn
   const handleUserClick = (user: UserWithMessages) => {
     onClickMessage(user._id, user.name, user.email, user.messages)
+    console.log('UserShow ', user._id)
   }
 
   return (

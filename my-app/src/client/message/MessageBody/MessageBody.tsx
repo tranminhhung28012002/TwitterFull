@@ -6,9 +6,6 @@ import Cookies from 'js-cookie'
 
 interface Message {
   content: string
-  senderId: string
-  timestamp: string
-  status: 'sent' | 'seen'
 }
 
 interface MessageBodyProps {
@@ -17,11 +14,13 @@ interface MessageBodyProps {
   messages: Message[]
 }
 
-export default function MessageBody({ receiverId, receiverName, messages = [] }: MessageBodyProps) {
+// Xuất hàm MessageBody
+export function MessageBody({ receiverId, receiverName, messages = [] }: MessageBodyProps) {
   const [newMessage, setNewMessage] = useState<string>('')
   const [chatMessages, setChatMessages] = useState<Message[]>(messages)
   const [userInfo, setUserInfo] = useState<string>('')
 
+  // Lấy thông tin người dùng
   useEffect(() => {
     const fetchUserInfo = async () => {
       const token = Cookies.get('access_token')
@@ -40,10 +39,12 @@ export default function MessageBody({ receiverId, receiverName, messages = [] }:
     fetchUserInfo()
   }, [])
 
+  // Cập nhật danh sách tin nhắn khi prop messages thay đổi
   useEffect(() => {
     setChatMessages(messages)
   }, [messages])
-  console.log('Message show =>>>>', messages)
+
+  // Lắng nghe tin nhắn mới từ socket
   useEffect(() => {
     const handleNewMessage = (message: Message) => {
       setChatMessages((prev) => [...prev, message])
@@ -55,21 +56,19 @@ export default function MessageBody({ receiverId, receiverName, messages = [] }:
     }
   }, [])
 
+  // Gửi tin nhắn
   const handleSendMessage = () => {
     if (newMessage.trim() === '') return
 
-    const messageData = {
-      content: newMessage,
-      senderId: userInfo,
-      receiverId,
-      timestamp: new Date().toISOString(),
-      status: 'sent'
+    const messageData: Message = {
+      content: newMessage
     }
-    socket.emit('sendMessage', messageData)
+
+    // Gửi tin nhắn qua socket
+    socket.emit('sendMessage', { content: newMessage, receiverId }) // Gửi ID người nhận
     setNewMessage('')
   }
-  console.log('receiID', receiverId)
-  console.log('senderID: ', userInfo)
+
   return (
     <div className={styles.ChatBox}>
       <div className={styles.ChatBox__body}>
@@ -77,17 +76,8 @@ export default function MessageBody({ receiverId, receiverName, messages = [] }:
         <div className={styles.messagesContainer}>
           {chatMessages.length > 0 ? (
             chatMessages.map((message, index) => (
-              <div
-                key={index}
-                className={`${styles.message} ${
-                  message.senderId === userInfo ? styles.messageRight : styles.messageLeft
-                }`}
-              >
-                <div className={styles.messageInfo}>
-                  <div className={styles.messageContent}>{message.content}</div>
-                  <span className={styles.messageTimestamp}>{new Date(message.timestamp).toLocaleTimeString()}</span>
-                  <span className={styles.messageStatus}>{message.status === 'seen' ? 'Đã xem' : 'Đã gửi'}</span>
-                </div>
+              <div key={index} className={styles.message}>
+                <div className={styles.messageContent}>{message.content}</div>
               </div>
             ))
           ) : (
@@ -107,3 +97,5 @@ export default function MessageBody({ receiverId, receiverName, messages = [] }:
     </div>
   )
 }
+
+export default MessageBody // Xuất mặc định

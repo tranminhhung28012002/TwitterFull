@@ -16,31 +16,28 @@ export default function Message() {
   const [messages, setMessages] = useState<Message[]>([]) // Lưu danh sách tin nhắn
 
   const handlePostClick = () => setShowPostForm(true)
-  const token = Cookies.get('access_token')
+
   const handleUserClick = async (userId: string, userName: string) => {
     setReceiverId(userId)
     setReceiverName(userName)
     setMessages([]) // Xóa tin nhắn cũ trước khi tải tin nhắn mới
+    const token = Cookies.get('access_token')
     try {
-      const response = await axios.get(`http://localhost:3000/conversations/receivers/${userId}`, {
+      const response = await axios.get(`http://localhost:3000/conversations/receivers/${userId}?limit=10&page=1`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      setMessages(
-        response.data.messages.map((msg: Message) => ({
-          ...msg,
-          timestamp: msg.timestamp || '', // Provide a default value if undefined
-          status: msg.status === 'sent' || msg.status === 'seen' ? msg.status : 'sent' // Ensure status is either 'sent' or 'seen'
-        }))
-      )
+      setMessages(response.data.messages.map((msg: Message) => msg.content))
       // Cập nhật tin nhắn từ API
     } catch (error) {
       console.error('Lỗi khi tải tin nhắn:', error)
     }
+    console.log('MessageHeader keo qua ', userId)
   }
 
   // Lấy thông tin người dùng đăng nhập
   useEffect(() => {
     const fetchUserInfo = async () => {
+      const token = Cookies.get('access_token')
       try {
         if (!token) return
         const response = await axios.get('http://localhost:3000/api/me', {
@@ -56,7 +53,7 @@ export default function Message() {
       }
     }
     fetchUserInfo()
-  }, [token])
+  }, [])
   if (loading) return <div>Loading...</div>
 
   return (
