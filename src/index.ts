@@ -10,6 +10,7 @@ import tweetsRouter from './routes/Tweet.routes'
 import bookmarksRouter from './routes/bookmarks.routes'
 import likesRouter from './routes/likes.routes'
 import searchRouter from './routes/search.routes'
+import conversationsRouter from './routes/conversations.routes'
 
 const app = express()
 const port = 3000
@@ -32,6 +33,8 @@ app.use('/like', likesRouter)
 app.use('/static', staticRouter) // dùng để chạy những file video hay ảnh tĩnh
 app.use('/tweet', tweetsRouter)
 app.use('/searchTweets', searchRouter)
+
+app.use('/conversations', conversationsRouter)
 
 //database
 DatabaseService.connect().then(() => {

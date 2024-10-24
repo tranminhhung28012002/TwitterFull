@@ -8,6 +8,7 @@ import Tweet from '../models/schemas/Twitter.schema'
 import Hashtag from '../models/schemas/Hashtag.Schema'
 import Bookmark from '../models/schemas/Bookmark.schema'
 import Likes from '../models/schemas/Like.schema'
+import Conversation from '../models/schemas/Conversations.schema'
 
 // sử dụng process để trỏ đến file env để sử dụng tài nguyên từ file đó
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitter.jdianmg.mongodb.net/?retryWrites=true&w=majority&appName=Twitte`
@@ -67,6 +68,10 @@ class DatabaseService {
   }
   get likes(): Collection<Likes> {
     return this.db.collection(process.env.DB_LIKES_COLLECTION as string)
+  }
+
+  get conversations(): Collection<Conversation> {
+    return this.db.collection(process.env.DB_VIDEO_STATUS_CONVERSATION as string)
   }
 }
 
