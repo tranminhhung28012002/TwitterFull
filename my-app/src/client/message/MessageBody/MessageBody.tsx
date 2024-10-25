@@ -3,7 +3,7 @@ import axios from 'axios'
 import styles from './MessageBody.module.scss'
 import socket from '../Socket/socket'
 import Cookies from 'js-cookie'
-import type { Message } from '../../../types'
+import type { conversations } from '../../../types'
 
 interface MessageBodyProps {
   receiverId: string
@@ -14,7 +14,7 @@ const LIMIT = 10
 
 export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
   const [newMessage, setNewMessage] = useState<string>('')
-  const [chatMessages, setChatMessages] = useState<Message[]>([])
+  const [chatMessages, setChatMessages] = useState<conversations[]>([])
   const [senderId, setSenderId] = useState<string>('')
   const [senderName, setSenderName] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
@@ -25,7 +25,6 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
     const fetchSenderInfo = async () => {
       const token = Cookies.get('access_token')
       if (!token) return
-
       try {
         const response = await axios.get('http://localhost:3000/api/me', {
           headers: { Authorization: `Bearer ${token}` }
@@ -48,11 +47,16 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
 
       setLoading(true)
       try {
-        const response = await axios.get(`http://localhost:3000/conversations/receivers/${receiverId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { limit: LIMIT, page: 1 }
-        })
-        setChatMessages(response.data.content || [])
+        const response = await axios.get(
+          `http://localhost:3000/conversations/receivers/${receiverId}?limit=10&page=1`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { limit: LIMIT, page: 1 }
+          }
+        )
+
+        console.log(response.data.result.conversations) // Log the response to check structure
+        setChatMessages(response.data.result.conversations) // Ensure this is an array
       } catch (error) {
         console.error('Error loading messages:', error)
       } finally {
@@ -67,13 +71,34 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
 
   // Socket event handlers
   useEffect(() => {
+    // Event for receiving messages
     socket.on('receive_message', (payload) => {
-      setChatMessages((prev) => [...prev, payload])
+      console.log('Received message payload:', payload) // Log payload to check structure
+
+      // Update chatMessages safely
+      setChatMessages((prev) => {
+        if (Array.isArray(prev)) {
+          return [...prev, payload] // If prev is an array, add payload
+        }
+        return [payload] // If not, create a new array with payload
+      })
+
       scrollToBottom()
     })
 
+    // Handle connection errors
+    socket.on('connect_error', (err) => {
+      console.log(err) // Handle connection error
+    })
+
+    // Handle disconnect events
+    socket.on('disconnect', (reason) => {
+      console.log(reason) // Handle disconnection
+    })
+
     return () => {
-      socket.off('receive_message')
+      socket.off('receive_message') // Clean up event listeners
+      socket.disconnect() // Disconnect socket on component unmount
     }
   }, [])
 
@@ -99,7 +124,15 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
     }
 
     socket.emit('send_message', { payload: conversation })
-    setChatMessages((prev) => [...prev, conversation])
+
+    // Update chatMessages safely
+    setChatMessages((prev) => {
+      if (Array.isArray(prev)) {
+        return [...prev, conversation] // If prev is an array, add conversation
+      }
+      return [conversation] // If not, create a new array with conversation
+    })
+
     setNewMessage('')
     scrollToBottom()
   }
@@ -111,12 +144,28 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
         <div className={styles.messagesContainer}>
           {loading ? (
             <p>Loading messages...</p>
+          ) : Array.isArray(chatMessages) && chatMessages.length > 0 ? (
+            chatMessages
+              .filter(
+                (conversation) =>
+                  (conversation.sender_id === senderId && conversation.receiver_id === receiverId) ||
+                  (conversation.sender_id === receiverId && conversation.receiver_id === senderId)
+              )
+              .map((conversation, index) => (
+                <div key={index} className={styles.message}>
+                  <div className={styles.message__Content}>
+                    {/* Check if the conversation is from the sender */}
+                    {conversation.sender_id === senderId ? (
+                      <strong>{senderName}: </strong> // Display sender's name
+                    ) : (
+                      <strong>{receiverName}: </strong> // Display receiver's name
+                    )}
+                    {conversation.content} {/* Display the message content */}
+                  </div>
+                </div>
+              ))
           ) : (
-            chatMessages.map((message, index) => (
-              <div key={index} className={styles.message}>
-                <div className={styles.message__Content}>{message.content}</div>
-              </div>
-            ))
+            <p>No messages found.</p>
           )}
           <div ref={messagesEndRef} />
         </div>

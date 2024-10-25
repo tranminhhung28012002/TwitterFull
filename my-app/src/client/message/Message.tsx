@@ -5,15 +5,11 @@ import MessageBody from './MessageBody'
 import MessageHeader from './MessageHeader'
 import Cookies from 'js-cookie'
 import axios from 'axios'
-import type { Message } from '../../types'
-
-const LIMIT = 10
 
 export default function Message() {
   const [showPostForm, setShowPostForm] = useState(false)
   const [userInfo, setUserInfo] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [conversations, setConversations] = useState([]) // Danh sách cuộc hội thoại
   const [receiverId, setReceiverId] = useState<string>('') // ID của người nhận
   const [receiverName, setReceiverName] = useState<string>('') // Tên người nhận
   const [senderId, setSenderId] = useState<string>('') // Thêm state cho senderId

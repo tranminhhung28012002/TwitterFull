@@ -1,4 +1,4 @@
-export interface Message {
+export interface conversations {
   _id: string
   sender_id: string
   receiver_id: string

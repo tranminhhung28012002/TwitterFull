@@ -4,7 +4,7 @@ import styles from './MessageHeader.module.scss'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import { Message } from '../../../types'
+import type { conversations } from '../../../types'
 
 interface User {
   _id: string
@@ -14,7 +14,7 @@ interface User {
 }
 
 interface UserWithMessages extends User {
-  messages: Message[]
+  content: conversations[]
 }
 
 interface PropsClick {
@@ -22,7 +22,7 @@ interface PropsClick {
     receiverId: string, // ID người dùng được chọn
     name: string,
     email: string,
-    messages: Message[]
+    messages: conversations[]
   ) => void
   senderId: string // ID của người dùng hiện tại
 }
@@ -52,7 +52,7 @@ export default function MessageHeader({ onClickMessage, senderId }: PropsClick) 
 
   // Xử lý khi người dùng nhấn vào một người dùng
   const handleUserClick = (user: UserWithMessages) => {
-    onClickMessage(user._id, user.name, user.email, user.messages) // Gửi thông tin người dùng được chọn
+    onClickMessage(user._id, user.name, user.email, user.content) // Gửi thông tin người dùng được chọn
     console.log('Sender Info:', senderId) // Kiểm tra senderId
     console.log('Receiver Info:', user._id) // Kiểm tra receiverId
   }
