@@ -4,13 +4,13 @@ import styles from './MessageHeader.module.scss'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import { Message } from '../../../types' // Import the shared Message interface
+import { Message } from '../../../types'
 
 interface User {
   _id: string
   email: string
   name: string
-  avatar: string // Sửa từ userAvatar thành avatar
+  avatar: string
 }
 
 interface UserWithMessages extends User {
@@ -18,33 +18,43 @@ interface UserWithMessages extends User {
 }
 
 interface PropsClick {
-  onClickMessage: (userId: string, name: string, email: string, messages: Message[]) => void
+  onClickMessage: (
+    receiverId: string, // ID người dùng được chọn
+    name: string,
+    email: string,
+    messages: Message[]
+  ) => void
+  senderId: string // ID của người dùng hiện tại
 }
 
-export default function MessageHeader({ onClickMessage }: PropsClick) {
-  const [userList, setUserList] = useState<UserWithMessages[]>([]) // Chỉnh lại kiểu dữ liệu theo userList
-  const token = Cookies.get('access_token')
+export default function MessageHeader({ onClickMessage, senderId }: PropsClick) {
+  const [userList, setUserList] = useState<UserWithMessages[]>([])
 
-  // Lấy danh sách người dùng và các tin nhắn liên quan
+  // Lấy danh sách người dùng khi component được mount
   useEffect(() => {
     const fetchUsers = async () => {
+      const token = Cookies.get('access_token')
+      if (!token) return
+
       try {
         const { data } = await axios.get('http://localhost:3000/api/listUsers', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         })
-        setUserList(data.result) // Giả định `data.result` trả về danh sách người dùng và tin nhắn
+        setUserList(data.result) // Lưu danh sách người dùng vào state
       } catch (error) {
-        console.error('Error fetching users:', error)
+        console.error('Lỗi khi lấy danh sách người dùng:', error)
       }
     }
     fetchUsers()
-  }, [token])
-  // Khi người dùng được chọn
+  }, [])
+
+  // Xử lý khi người dùng nhấn vào một người dùng
   const handleUserClick = (user: UserWithMessages) => {
-    onClickMessage(user._id, user.name, user.email, user.messages)
-    console.log('UserShow ', user._id)
+    onClickMessage(user._id, user.name, user.email, user.messages) // Gửi thông tin người dùng được chọn
+    console.log('Sender Info:', senderId) // Kiểm tra senderId
+    console.log('Receiver Info:', user._id) // Kiểm tra receiverId
   }
 
   return (
@@ -62,7 +72,7 @@ export default function MessageHeader({ onClickMessage }: PropsClick) {
           <div
             key={user._id}
             className={styles.MessageList__item}
-            onClick={() => handleUserClick(user)} // Truyền cả đối tượng user
+            onClick={() => handleUserClick(user)} // Gọi hàm khi nhấn vào người dùng
           >
             <img src={user.avatar} alt={`${user.name}'s avatar`} className={styles.MessageList__avatar} />
             <p className={styles.MessageList__name}>{user.name}</p>

@@ -5,63 +5,59 @@ import MessageBody from './MessageBody'
 import MessageHeader from './MessageHeader'
 import Cookies from 'js-cookie'
 import axios from 'axios'
-import type { Message } from '../../types' // Import the shared Message interface
+import type { Message } from '../../types'
+
+const LIMIT = 10
 
 export default function Message() {
   const [showPostForm, setShowPostForm] = useState(false)
   const [userInfo, setUserInfo] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [receiverId, setReceiverId] = useState<string>('') // Lưu userId của người nhận
-  const [receiverName, setReceiverName] = useState<string>('') // Lưu tên người nhận
-  const [messages, setMessages] = useState<Message[]>([]) // Lưu danh sách tin nhắn
-
-  const handlePostClick = () => setShowPostForm(true)
-
-  const handleUserClick = async (userId: string, userName: string) => {
-    setReceiverId(userId)
-    setReceiverName(userName)
-    setMessages([]) // Xóa tin nhắn cũ trước khi tải tin nhắn mới
-    const token = Cookies.get('access_token')
-    try {
-      const response = await axios.get(`http://localhost:3000/conversations/receivers/${userId}?limit=10&page=1`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setMessages(response.data.messages.map((msg: Message) => msg.content))
-      // Cập nhật tin nhắn từ API
-    } catch (error) {
-      console.error('Lỗi khi tải tin nhắn:', error)
-    }
-    console.log('MessageHeader keo qua ', userId)
-  }
+  const [conversations, setConversations] = useState([]) // Danh sách cuộc hội thoại
+  const [receiverId, setReceiverId] = useState<string>('') // ID của người nhận
+  const [receiverName, setReceiverName] = useState<string>('') // Tên người nhận
+  const [senderId, setSenderId] = useState<string>('') // Thêm state cho senderId
 
   // Lấy thông tin người dùng đăng nhập
   useEffect(() => {
     const fetchUserInfo = async () => {
       const token = Cookies.get('access_token')
+      if (!token) return // Nếu không có token thì dừng
       try {
-        if (!token) return
         const response = await axios.get('http://localhost:3000/api/me', {
           withCredentials: true,
           headers: { Authorization: `Bearer ${token}` }
         })
         const { result } = response.data
-        setUserInfo(result)
+        setUserInfo(result) // Lưu thông tin người dùng
+        setSenderId(result._id) // Lưu ID người gửi
+        console.log('Thông tin người dùng:', result)
       } catch (error) {
         console.error('Lỗi khi lấy thông tin người dùng:', error)
       } finally {
-        setLoading(false)
+        setLoading(false) // Đặt trạng thái loading thành false sau khi hoàn thành
       }
     }
+
     fetchUserInfo()
   }, [])
-  if (loading) return <div>Loading...</div>
+
+  const handlePostClick = () => setShowPostForm(true)
+
+  // Xử lý khi người dùng nhấn vào một cuộc hội thoại
+  const handleUserClick = (receiverId: string, name: string) => {
+    setReceiverId(receiverId)
+    setReceiverName(name)
+  }
+
+  if (loading) return <div>Loading...</div> // Hiển thị loading nếu đang tải
 
   return (
     <div className={styles.Container}>
       <Navbar onPostClick={handlePostClick} userInfo={userInfo} />
-      <MessageHeader onClickMessage={handleUserClick} />
+      <MessageHeader onClickMessage={handleUserClick} senderId={senderId} /> {/* Truyền senderId vào đây */}
       {receiverId ? (
-        <MessageBody receiverId={receiverId} receiverName={receiverName} messages={messages} />
+        <MessageBody receiverId={receiverId} receiverName={receiverName} />
       ) : (
         <p className={styles.NoConversation}>Please select a conversation to start chatting.</p>
       )}
