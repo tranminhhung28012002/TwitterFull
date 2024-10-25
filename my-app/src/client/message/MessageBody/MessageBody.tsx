@@ -35,7 +35,6 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
         console.error('Error fetching user info:', error)
       }
     }
-
     fetchSenderInfo()
   }, [])
 
@@ -47,16 +46,11 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
 
       setLoading(true)
       try {
-        const response = await axios.get(
-          `http://localhost:3000/conversations/receivers/${receiverId}?limit=10&page=1`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { limit: LIMIT, page: 1 }
-          }
-        )
-
-        console.log(response.data.result.conversations) // Log the response to check structure
-        setChatMessages(response.data.result.conversations) // Ensure this is an array
+        const response = await axios.get(`http://localhost:3000/conversations/receivers/${receiverId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { limit: LIMIT, page: 1 }
+        })
+        setChatMessages(response.data.result.conversations)
       } catch (error) {
         console.error('Error loading messages:', error)
       } finally {
@@ -71,42 +65,28 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
 
   // Socket event handlers
   useEffect(() => {
-    // Event for receiving messages
-    socket.on('receive_message', (payload) => {
-      console.log('Received message payload:', payload) // Log payload to check structure
-
-      // Update chatMessages safely
-      setChatMessages((prev) => {
-        if (Array.isArray(prev)) {
-          return [...prev, payload] // If prev is an array, add payload
-        }
-        return [payload] // If not, create a new array with payload
-      })
-
+    const handleMessageReceived = (payload: conversations) => {
+      console.log('Received message payload:', payload)
+      updateChatMessages(payload)
       scrollToBottom()
-    })
+    }
 
-    // Handle connection errors
-    socket.on('connect_error', (err) => {
-      console.log(err) // Handle connection error
-    })
-
-    // Handle disconnect events
-    socket.on('disconnect', (reason) => {
-      console.log(reason) // Handle disconnection
-    })
+    socket.on('receive_message', handleMessageReceived)
+    socket.on('connect_error', (err) => console.log(err))
+    socket.on('disconnect', (reason) => console.log(reason))
 
     return () => {
-      socket.off('receive_message') // Clean up event listeners
-      socket.disconnect() // Disconnect socket on component unmount
+      socket.off('receive_message', handleMessageReceived)
     }
   }, [])
 
+  const updateChatMessages = (message: conversations) => {
+    setChatMessages((prev) => [...prev, message])
+  }
+
   // Scroll to the bottom of the messages
   const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
   // Handle sending a message
@@ -124,15 +104,7 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
     }
 
     socket.emit('send_message', { payload: conversation })
-
-    // Update chatMessages safely
-    setChatMessages((prev) => {
-      if (Array.isArray(prev)) {
-        return [...prev, conversation] // If prev is an array, add conversation
-      }
-      return [conversation] // If not, create a new array with conversation
-    })
-
+    updateChatMessages(conversation)
     setNewMessage('')
     scrollToBottom()
   }
@@ -144,7 +116,7 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
         <div className={styles.messagesContainer}>
           {loading ? (
             <p>Loading messages...</p>
-          ) : Array.isArray(chatMessages) && chatMessages.length > 0 ? (
+          ) : chatMessages.length > 0 ? (
             chatMessages
               .filter(
                 (conversation) =>
@@ -154,13 +126,8 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
               .map((conversation, index) => (
                 <div key={index} className={styles.message}>
                   <div className={styles.message__Content}>
-                    {/* Check if the conversation is from the sender */}
-                    {conversation.sender_id === senderId ? (
-                      <strong>{senderName}: </strong> // Display sender's name
-                    ) : (
-                      <strong>{receiverName}: </strong> // Display receiver's name
-                    )}
-                    {conversation.content} {/* Display the message content */}
+                    <strong>{conversation.sender_id === senderId ? senderName : receiverName}:</strong>
+                    {conversation.content}
                   </div>
                 </div>
               ))

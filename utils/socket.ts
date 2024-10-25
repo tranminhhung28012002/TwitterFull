@@ -12,12 +12,13 @@ import databaseService from '../src/services/database.services'
 import Conversation from '../src/models/schemas/Conversations.schema'
 
 const initSocket = (httpServer: ServerHttp) => {
-  // Socket.io server với CORS configuration
+  // Cấu hình Socket.io với CORS
   const io = new Server(httpServer, {
     cors: {
-      origin: 'http://localhost:3001' // Địa chỉ của client
+      origin: ['http://localhost:3001'] // Địa chỉ của client
     }
   })
+  console.log(io)
 
   const users: {
     [key: string]: {
@@ -44,11 +45,7 @@ const initSocket = (httpServer: ServerHttp) => {
 
       next()
     } catch (error) {
-      next({
-        message: 'Không được phép',
-        name: 'Lỗi không được phép',
-        data: error
-      })
+      next(new Error('Không được phép'))
     }
   })
 
@@ -67,35 +64,47 @@ const initSocket = (httpServer: ServerHttp) => {
         await verifyAccessToken(access_token)
         next()
       } catch (error) {
-        next(new Error('Không_được_phép'))
+        next(new Error('Không được phép'))
       }
     })
 
     socket.on('error', (error) => {
-      if (error.message === 'Không_được_phép') {
+      if (error.message === 'Không được phép') {
         socket.disconnect()
       }
     })
 
     socket.on('send_message', async (data) => {
-      const { sender_id, receiver_id, content } = data.payload
-      const receiver_socket_id = users[receiver_id]?.socket_id
+      try {
+        const { sender_id, receiver_id, content } = data.payload
 
-      const conversation = new Conversation({
-        sender_id: new ObjectId(sender_id),
-        receiver_id: new ObjectId(receiver_id),
-        content: content
-      })
+        // Kiểm tra dữ liệu hợp lệ
+        if (!sender_id || !receiver_id || !content) {
+          return socket.emit('error', { message: 'Dữ liệu không hợp lệ' })
+        }
 
-      // Lưu tin nhắn vào MongoDB
-      const result = await databaseService.conversations.insertOne(conversation)
+        const receiver_socket_id = users[receiver_id]?.socket_id
 
-      conversation._id = result.insertedId
-
-      if (receiver_socket_id) {
-        socket.to(receiver_socket_id).emit('receive_message', {
-          payload: conversation
+        const conversation = new Conversation({
+          sender_id: new ObjectId(sender_id),
+          receiver_id: new ObjectId(receiver_id),
+          content: content
         })
+
+        // Lưu tin nhắn vào MongoDB
+        const result = await databaseService.conversations.insertOne(conversation)
+        conversation._id = result.insertedId
+
+        if (receiver_socket_id) {
+          socket.to(receiver_socket_id).emit('receive_message', {
+            payload: conversation
+          })
+        } else {
+          // Có thể xử lý trường hợp người nhận không trực tuyến ở đây
+          console.log(`Người nhận không trực tuyến: ${receiver_id}`)
+        }
+      } catch (error) {
+        socket.emit('error', { message: 'Lỗi gửi tin nhắn', error: error.message })
       }
     })
 
