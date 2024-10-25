@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import styles from './MessageBody.module.scss'
 import socket from '../Socket/socket'
@@ -14,9 +14,11 @@ const LIMIT = 10
 
 export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
   const [newMessage, setNewMessage] = useState<string>('')
-  const [chatMessages, setChatMessages] = useState<Message[]>([]) // Ensure it's initialized as an empty array
+  const [chatMessages, setChatMessages] = useState<Message[]>([])
   const [senderId, setSenderId] = useState<string>('')
-  const [senderName, setSenderName] = useState<string>('') // Thêm state để lưu tên người gửi
+  const [senderName, setSenderName] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(true)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   // Fetch sender's ID and name from the API
   useEffect(() => {
@@ -28,8 +30,8 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
         const response = await axios.get('http://localhost:3000/api/me', {
           headers: { Authorization: `Bearer ${token}` }
         })
-        setSenderId(response.data.result._id) // Store the sender's ID
-        setSenderName(response.data.result.name) // Lưu tên người gửi (giả định có thuộc tính name)
+        setSenderId(response.data.result._id)
+        setSenderName(response.data.result.name)
       } catch (error) {
         console.error('Error fetching user info:', error)
       }
@@ -38,20 +40,23 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
     fetchSenderInfo()
   }, [])
 
+  // Fetch messages when receiver changes
   useEffect(() => {
     const fetchMessages = async () => {
       const token = Cookies.get('access_token')
       if (!token) return
 
+      setLoading(true)
       try {
         const response = await axios.get(`http://localhost:3000/conversations/receivers/${receiverId}`, {
           headers: { Authorization: `Bearer ${token}` },
-          params: { limit: LIMIT, page: 1 } // Truyền tham số phân trang
+          params: { limit: LIMIT, page: 1 }
         })
-        console.log('Ket noi thanh cong')
-        setChatMessages(response.data.messages || []) // Ensure messages are set to an empty array if undefined
+        setChatMessages(response.data.content || [])
       } catch (error) {
-        console.error('Lỗi khi tải tin nhắn:', error)
+        console.error('Error loading messages:', error)
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -63,34 +68,40 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
   // Socket event handlers
   useEffect(() => {
     socket.on('receive_message', (payload) => {
-      // Khi nhận tin nhắn mới từ socket
-      setChatMessages((prev) => [...prev, payload]) // Cập nhật danh sách tin nhắn
+      setChatMessages((prev) => [...prev, payload])
+      scrollToBottom()
     })
+
     return () => {
       socket.off('receive_message')
     }
   }, [])
 
+  // Scroll to the bottom of the messages
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   // Handle sending a message
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    // Ngăn gửi tin nhắn trống
     if (!newMessage.trim()) return
 
     const conversation = {
       content: newMessage,
       sender_id: senderId,
       receiver_id: receiverId,
-      sender_name: senderName, // Bổ sung tên người gửi
-      _id: new Date().getTime().toString() // Ensure _id is a string
+      sender_name: senderName,
+      _id: new Date().getTime().toString()
     }
 
-    // Gửi tin nhắn qua socket
     socket.emit('send_message', { payload: conversation })
-    // Cập nhật danh sách tin nhắn
     setChatMessages((prev) => [...prev, conversation])
     setNewMessage('')
+    scrollToBottom()
   }
 
   return (
@@ -98,12 +109,16 @@ export function MessageBody({ receiverId, receiverName }: MessageBodyProps) {
       <div className={styles.ChatBox__body}>
         <p className={styles.ChatBox__name}>Chat with {receiverName}</p>
         <div className={styles.messagesContainer}>
-          {chatMessages.map((message, index) => (
-            <div key={index} className={styles.message}>
-              <div className={styles.message__Sender}>{message.receiver_id}:</div> {/* Hiển thị tên người gửi */}
-              <div className={styles.message__Content}>{message.content}</div>
-            </div>
-          ))}
+          {loading ? (
+            <p>Loading messages...</p>
+          ) : (
+            chatMessages.map((message, index) => (
+              <div key={index} className={styles.message}>
+                <div className={styles.message__Content}>{message.content}</div>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
         </div>
       </div>
       <form className={styles.ChatBox__input} onSubmit={handleSendMessage}>
